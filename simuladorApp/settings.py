@@ -77,11 +77,11 @@ WSGI_APPLICATION = "simuladorApp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "mibasededatos",
+        "NAME": "banco_info",
         "USER": "root",
-        "PASSWORD": "root123",
+        "PASSWORD": "abcd1234",
         "HOST": "localhost",
-        "PORT": "3306", 
+        "PORT": "3307", 
     }
 }
 
