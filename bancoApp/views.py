@@ -150,6 +150,62 @@ def retiro(request):
             )
             transaccion.save()
             return redirect( 'perfil' )
+        
+@login_required
+def transferencia(request):
+    if request.method == 'GET':
+            return render(  
+                request,
+                'operaciones/transferencia.html',
+            )
+    else:
+        cantidad = Decimal(request.POST.get('cantidad', 0.0))
+        if cantidad <= 0:
+            return render(
+                request,
+                'operaciones/transferencia.html',
+                {
+                    'error': 'Introduzca una cantidad válida.'
+                } 
+            )
+        
+        informacionUsuarioOrigen = InformacionBancaria.objects.get(usuario=request.user)
+
+        if informacionUsuarioOrigen.saldo < cantidad:
+            return render(
+                request,
+                'operaciones/transferencia.html',
+                {
+                    'error': 'No tienes saldo suficiente.'
+                } 
+            )
+        else:
+            informacionUsuarioOrigen.saldo -= cantidad
+            informacionUsuarioOrigen.save()
+
+            informacionUsuarioDestino = InformacionBancaria.objects.get(usuario=request.POST.get('destino'))
+            informacionUsuarioDestino += cantidad
+            informacionUsuarioDestino.save()
+
+            transaccion_envio = Transaccion(
+                usuario=request.user,
+                tipo='TransferenciaSaliente',
+                monto=cantidad,  
+                fecha=datetime.now()
+            )
+            transaccion_envio.save()
+
+            transaccion_recepcion = Transaccion(
+                usuario=request.POST.get('destino'),
+                tipo='TransferenciaEntrante',
+                monto=cantidad,  
+                fecha=datetime.now()
+            )
+            transaccion_recepcion.save()
+
+
+
+            return redirect( 'perfil' )
        
 
 @login_required
