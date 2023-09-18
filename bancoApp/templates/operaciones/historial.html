@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %} Historial de Transacciones {% endblock %}
+
+{% block contenido %}
+    <h1>Historial de Transacciones</h1>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaccion in transacciones %}
+            <tr>
+                <td>{{ transaccion.tipo }}</td>
+                <td>{{ transaccion.monto }}</td>
+                <td>{{ transaccion.fecha }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
