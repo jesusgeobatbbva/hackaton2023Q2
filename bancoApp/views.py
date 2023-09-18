@@ -105,10 +105,39 @@ def inicio(request):
 
 @login_required
 def deposito(request):
-    return render(
-        request,
-        'operaciones/deposito.html',
-    )
+    if request.method == 'GET':
+            return render(  
+                request,
+                'operaciones/deposito.html',
+            )
+    else:
+        cantidad = Decimal(request.POST.get('cantidad', 0.0))
+        if cantidad <= 0:
+            return render(
+                request,
+                'operaciones/retiro.html',
+                {
+                    'error': 'Introduzca una cantidad válida.'
+                } 
+            )
+        
+        #numeroCuentaOrigen = informacionUsuario.numero_cuenta
+        numeroCuentaReceptor = str(request.POST.get('id_destinatario', ''))
+        informacionUsuario = InformacionBancaria.objects.get( numero_cuenta = numeroCuentaReceptor)
+
+        
+        informacionUsuario.saldo += cantidad
+        informacionUsuario.save()
+        receptor = InformacionBancaria.objects.get( numero_cuenta = numeroCuentaReceptor )
+        transaccion = Transaccion(
+                usuario=receptor.usuario,
+                tipo='Deposito',
+                monto=cantidad,  
+                fecha=datetime.now()
+            )
+        transaccion.save()
+        return redirect( 'perfil' )            
+          
 
 @login_required
 def retiro(request):
@@ -158,56 +187,65 @@ def historial(request):
     return render(request, 'operaciones/historial.html', {'transacciones': transacciones})
 
 
-"""
-import matplotlib.pyplot as plt
-import io
-import base64
-from django.shortcuts import render
-from .models import Transaccion
-
 @login_required
-def historial(request):
-    # Obtén las transacciones para el usuario actual
-    transacciones = Transaccion.objects.filter(usuario=request.user).order_by('-fecha')
+def transferencia(request):
+    if request.method == 'GET':
+            return render(  
+                request,
+                'operaciones/transferencia.html',
+            )
+    else:
+        cantidad = Decimal(request.POST.get('cantidad', 0.0))
+        if cantidad <= 0:
+            return render(
+                request,
+                'operaciones/transferencia.html',
+                {
+                    'error': 'Introduzca una cantidad válida.'
+                }
+            )
+       
+        informacionUsuarioOrigen = InformacionBancaria.objects.get(usuario=request.user)
 
-    # Crear listas de fechas y montos para el gráfico
-    fechas = [transaccion.fecha for transaccion in transacciones]
-    montos = [transaccion.monto for transaccion in transacciones]
 
-    # Crear el gráfico
-    plt.figure(figsize=(10, 6))
-    plt.plot(fechas, montos, marker='o')
-    plt.xlabel('Fecha')
-    plt.ylabel('Monto')
-    plt.title('Historial de Transacciones')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
+        if informacionUsuarioOrigen.saldo < cantidad:
+            return render(
+                request,
+                'operaciones/transferencia.html',
+                {
+                    'error': 'No tienes saldo suficiente.'
+                }
+            )
+        else:
+            informacionUsuarioOrigen.saldo -= cantidad
+            informacionUsuarioOrigen.save()
 
-    # Guardar el gráfico en un archivo BytesIO
-    img_buffer = io.BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
 
-    # Convertir el gráfico a base64 para incrustarlo en la plantilla
-    img_base64 = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
+            informacionUsuarioDestino = InformacionBancaria.objects.get(usuario=request.POST.get('destino'))
+            informacionUsuarioDestino.saldo += cantidad
+            informacionUsuarioDestino.save()
 
-    plt.close()
 
-    # Renderizar la plantilla con el gráfico incrustado
-    return render(request, 'operaciones/historial.html', {'transacciones': transacciones, 'img_base64': img_base64})
+            transaccion_envio = Transaccion(
+                usuario=request.user,
+                tipo='TransferenciaSaliente',
+                monto=cantidad,  
+                fecha=datetime.now()
+            )
+            transaccion_envio.save()
 
-    
-    {% extends "base.html" %}
 
-{% block content %}
-  <h1>Historial de Transacciones</h1>
-  <table>
-    <!-- Mostrar tus transacciones en una tabla -->
-  </table>
+            transaccion_recepcion = Transaccion(
+                usuario=informacionUsuarioDestino.usuario,
+                tipo='TransferenciaEntrante',
+                monto=cantidad,  
+                fecha=datetime.now()
+            )
+            transaccion_recepcion.save()
 
-  <!-- Mostrar el gráfico -->
-  <img src="data:image/png;base64,{{ img_base64 }}" alt="Gráfico de Transacciones">
-{% endblock %}
 
-"""
 
+
+
+
+            return redirect( 'perfil' )

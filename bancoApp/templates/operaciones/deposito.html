@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block titulo %} Inicio de sesión {% endblock %}
+
+{% block contenido %} 
+
+    <h1>    Operación: Deposito   </h1>
+    {{ error }}
+    </br></br>
+    
+    <form method="post">
+        {% csrf_token %}
+        </br></br>
+
+        <div class="mb-3">
+            <label for="" class="form-label">Número de cuenta</label>
+            <input type="text"
+              class="form-control" name="id_destinatario" aria-describedby="helpId" placeholder="012345">
+            <small id="helpId" class="form-text text-muted">Ingrese la información</small>
+          </div>
+
+        <div class="mb-3">
+          <label for="" class="form-label">Cantidad</label>
+          <input type="text"
+            class="form-control" name="cantidad" aria-describedby="helpId" placeholder="$ 0.00">
+          <small id="helpId" class="form-text text-muted">Ingrese la cantidad a retirar</small>
+        </div>
+
+
+        </br></br>
+        <input class="btn btn-danger" type="submit" value="Hacer deposito">
+        <a class="btn btn-primary" href="{% url 'perfil' %}" role="button">Regresar a perfil</a>
+    </form>
+    
+
+{% endblock %}

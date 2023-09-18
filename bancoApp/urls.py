@@ -11,5 +11,6 @@ urlpatterns = [
     path('perfil/retiro'        ,   views.retiro,     name='retiro'     ),
     path('perfil/historial'     ,   views.historial,  name='historial'  ),
     path('perfil/deposito'      ,   views.deposito,   name='deposito'   ),
+    path('perfil/transferencia'    ,   views.transferencia,   name='transferencia'   ),
 
 ]

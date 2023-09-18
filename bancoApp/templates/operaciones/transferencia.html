@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+
+{% block titulo %} Transferencia {% endblock %}
+
+
+{% block contenido %}
+
+
+    <h1>    Operación: Transferir   </h1>
+    {{ error }}
+    </br></br>
+   
+    <form method="post">
+        {% csrf_token %}
+        </br></br>
+
+
+        <div class="mb-3">
+          <label for="" class="form-label">Cantidad</label>
+          <input type="text"
+            class="form-control" name="cantidad" aria-describedby="helpId" placeholder="$ 0.00">
+           
+          <small id="helpId" class="form-text text-muted">Ingrese la cantidad a transferir</small>
+        </div>
+
+
+        <div class="mb-3">
+            <label for="" class="form-label">Destino</label>
+            <input type="text"
+              class="form-control" name="destino" aria-describedby="helpId" placeholder="ID De Usuario">
+             
+            <small id="helpId" class="form-text text-muted">Ingrese el id de usuario</small>
+          </div>
+
+
+        </br></br>
+        <input class="btn btn-danger" type="submit" value="Transferir">
+        <a class="btn btn-primary" href="{% url 'perfil' %}" role="button">Regresar a perfil</a>
+    </form>
+   
+
+
+{% endblock %}
